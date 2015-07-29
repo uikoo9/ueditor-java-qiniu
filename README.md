@@ -1,64 +1,86 @@
-# ueditor-java-bcs-qiniu
+# ueditor-java-qiniu
+
+## 说明
+鉴于大部分用户对ueditor直接上传七牛云比较热衷，同时七牛云对sdk做了升级，
+对原[ueditor-java-bcs-qiniu](https://github.com/uikoo9/ueditor-java-bcs-qiniu)进行升级，
+
+1. 原ueditor-java-bcs-qiniu停止升级；
+2. 停止对bcs（百度云存储）的支持；
+3. 升级ueditor中上传到七牛云的代码，支持最新的七牛云sdk。 
 
 ## 简介
 1. 对ueditor.jar源码进行修改
-2. 使其支持上传文件，图片等到服务器，bcs（百度云存储），qiniu（七牛云）
+2. 使其支持上传文件，图片等到服务器，qiniu（七牛云）
 
 ## 使用
 1. 请下载本项目并导入eclipse在tomcat下运行
 2. config.properties中的jfinal.ueditor.upload_to
 	1. 值为local时上传到服务器
-	2. 值为bcs时上传到bcs
-	3. 值为qiniu时上传到qiniu
-3. config.properties中的bcs和qiniu需要修改为自己的ak，sk，bucketname
-4. WebRoot\WUI\ueditor-min-1.4.3\jsp\config.json中
+	2. 值为qiniu时上传到qiniu
+3. config.properties中的qiniu需要修改为自己的ak，sk，bucketname
+4. WebRoot\ueditor-min-1.4.3\jsp\config.json中
 	1. imageUrlPrefix，videoUrlPrefix，fileUrlPrefix，三个值需要修改
 	2. 当上传到local时设置对应的local地址，例如：http://localhost/ue
-	3. 当上传到bcs，qiniu时设置为对应的地址，例如：http://yourname.qiniudn.com/@
+	3. 当上传到qiniu时设置为对应的地址，例如：http://yourname.qiniudn.com/@
 
-## jar引入
-1. 当upload_to=qiniu的时候，需要去qiniu官网下载相关jar引入
-	1. 注意，由于很多人需要上传到七牛云，所以直接引入了七牛云的相关jar，
-	2. 有不需要的可以删除，包括：
-		1. commons-logging-1.1.1.jar
-		2. httpclient-4.3.4.jar
-		3. httpcore-4.3.2.jar
-		4. httpmime-4.1.2.jar
-		5. qiniu-java-sdk-6.1.7.1.jar
-2. 当upload_to=bcs的时候，需要去百度云存储官网下载相关jar引入
+## jar包说明
+1. 项目下共有11个包，一次说明；
+2. [jfinal](http://www.jfinal.com/)相关jar，jfinal是一个mvc框架，类似ssh：
+	1. jfinal-1.9-bin.jar
+	2. freemarker-2.3.20.jar
+3. ueditor-1.1.1相关jar:
+	1. commons-codec-1.9.jar
+	2. commons-fileupload-1.3.1.jar
+	3. commons-io-2.4.jar
+	4. json.jar
+	5. ueditor-1.1.1-for-qiniu-new.jar
+	6. 其中ueditor-1.1.1-for-qiniu-new.jar的源码进行过修改，详见下
+4. qiniu-7.0.4相关jar
+	1. gson-2.3.1.jar
+	2. okhttp-2.3.0-SNAPSHOT.jar
+	3. okio-1.3.0-SNAPSHOT.jar
+	4. qiniu-java-sdk-7.0.4.jar
 
 ## 源码修改说明
 1. 修改了com.baidu.ueditor.upload.StorageManager.java一个文件
 2. 修改详情
 
 	    private static State saveTmpFile(File tmpFile, String path) {
-	        State state = null;
-	         
-	        File targetFile = new File(path);
-	        if (targetFile.canWrite()) {
-	            return new BaseState(false, AppInfo.PERMISSION_DENIED);
-	        }
-	         
-	        Properties config = QPropertiesUtil.config;
-	        if(QPropertiesUtil.getPropertyToBoolean(config, "bae.ueditor.upload_to_bcs")){
-	            String bucket = config.getProperty("bae.bcs.bucket");
-	            String object = "/" + path.split("//")[1];
-	            QBCSUtil.putObjectByFilePublic(bucket, object, tmpFile);
-	        }else{
-	            try {
-	                FileUtils.moveFile(tmpFile, targetFile);
-	            } catch (IOException e) {
-	                return new BaseState(false, AppInfo.IO_ERROR);
-	            }
-	             
-	        }
-	         
-	        state = new BaseState(true);
-	        state.putInfo( "size", targetFile.length() );
-	        state.putInfo( "title", targetFile.getName() );
-	         
-	        return state;
-	    }
+			State state = null;
+			File targetFile = new File(path);
+	
+			if (targetFile.canWrite()) {
+				return new BaseState(false, AppInfo.PERMISSION_DENIED);
+			}
+			
+			String uploadto = QPropertiesUtil.get("jfinal.ueditor.upload_to");
+			boolean uploaderror = false;
+			if(QStringUtil.notEmpty(uploadto)){
+				String key = "/" + path.split("//")[1];
+				
+				if("qiniu".equals(uploadto)){
+					QQiNiuUtil.uploadFile(key, tmpFile.getAbsolutePath());
+				}else{
+					uploaderror = true;
+				}
+			}else{
+				uploaderror = true;
+			}
+			
+			if(uploaderror){
+				try {
+		            FileUtils.moveFile(tmpFile, targetFile);
+		        } catch (IOException e) {
+		            return new BaseState(false, AppInfo.IO_ERROR);
+		        }
+			}
+			
+			state = new BaseState(true);
+			state.putInfo( "size", targetFile.length() );
+			state.putInfo( "title", targetFile.getName() );
+			
+			return state;
+		}
 
 ## 作者
 1. uikoo9
