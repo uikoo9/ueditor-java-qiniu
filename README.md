@@ -2,6 +2,7 @@
 
 ## 说明
 鉴于大部分用户对ueditor直接上传七牛云比较热衷，同时七牛云对sdk做了升级，
+
 对原[ueditor-java-bcs-qiniu](https://github.com/uikoo9/ueditor-java-bcs-qiniu)进行升级，
 
 1. 原ueditor-java-bcs-qiniu停止升级；
@@ -24,7 +25,7 @@
 	3. 当上传到qiniu时设置为对应的地址，例如：http://yourname.qiniudn.com/@
 
 ## jar包说明
-1. 项目下共有11个包，一次说明；
+1. 项目下共有11个包，依次说明；
 2. [jfinal](http://www.jfinal.com/)相关jar，jfinal是一个mvc框架，类似ssh：
 	1. jfinal-1.9-bin.jar
 	2. freemarker-2.3.20.jar
