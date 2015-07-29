@@ -7,7 +7,7 @@ import com.jfinal.core.Controller;
 public class IndexController extends Controller {
 	public void index() {
 		setAttr("base", getHttpPath(getRequest()));
-		render("/WEB-INF/view/index.ftl");
+		render("/WEB-INF/view/index.html");
 	}
 	
 	private String getHttpPath(HttpServletRequest request){
