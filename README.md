@@ -23,6 +23,10 @@
 	1. imageUrlPrefix，videoUrlPrefix，fileUrlPrefix，三个值需要修改
 	2. 当上传到local时设置对应的local地址，例如：http://localhost/ue
 	3. 当上传到qiniu时设置为对应的地址，例如：http://yourname.qiniudn.com/@
+5. 项目启动时执行获取uptoken的线程
+	1. 请在项目启动时调用QQiNiuUtil.genUptoken();
+	2. 由于每个uptoken默认有效期限为3600s，所以需要定时获取，写了一个线程去获取
+	3. 多谢[gelosie](https://github.com/gelosie)的提醒
 
 ## jar包说明
 1. 项目下共有11个包，依次说明；
