@@ -1,5 +1,6 @@
 package com.uikoo9;
 
+import com.baidu.ueditor.util.QQiNiuUtil;
 import com.jfinal.config.Constants;
 import com.jfinal.config.Handlers;
 import com.jfinal.config.Interceptors;
@@ -30,5 +31,9 @@ public class MyConfig extends JFinalConfig {
 	public void configPlugin(Plugins me) {}
 	public void configInterceptor(Interceptors me) {}
 	public void configHandler(Handlers me) {}
-	public static void main(String[] args) {}
+	
+	@Override
+	public void afterJFinalStart() {
+		QQiNiuUtil.genUptoken();
+	}
 }
